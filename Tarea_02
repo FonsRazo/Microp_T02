@@ -1,32 +1,26 @@
 LD B, 0x12       ; Número 1 en hexadecimal
     LD C, 0x34       ; Número 2 en hexadecimal
 
-    ; Convertir primer número de hexadecimal a BCD
     LD A, B          ; Cargar el número en A
     DAA              ; Ajustar A a formato BCD
     LD B, A          ; Guardar número BCD en B
 
-    ; Convertir segundo número de hexadecimal a BCD
     LD A, C          ; Cargar el número en A
     DAA              ; Ajustar A a formato BCD
     LD C, A          ; Guardar número BCD en C
 
-    ; Guardar los números BCD convertidos en registros BC y DE
     LD D, B          ; Guardar B en D
     LD E, C          ; Guardar C en E
 
-    ; Sumar los números en BCD
     LD A, D          ; Cargar primer número en A
     ADD A, E         ; Sumar segundo número
     DAA              ; Ajustar resultado a formato BCD
 
-    ; Separar centenas, decenas y unidades del resultado
     LD H, A          ; Guardar centenas en H
     LD A, L          ; Cargar unidades en A
     LD L, A          ; Guardar unidades en L
     LD A, H          ; Cargar centenas en A
 
-    ; Programa termina
     HALT             ; Finalizar ejecución
 
 END: JP END
