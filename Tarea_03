@@ -1,0 +1,114 @@
+ORG 0000h 
+; Definición de constantes y direcciones de memoria
+CLAVE_CORRECTA: DB '1234'      
+INTENTOS_MAXIMOS: DB 3         
+
+; Variables
+clave_ingresada: DB 4 DUP (0)  
+intentos: DB 0                 ; Contador de intentos fallidos
+
+; Inicio del programa
+INICIO:
+    LD A, 0                    ; Reinicia el contador de intentos
+    LD (intentos), A
+
+PEDIR_CLAVE:
+    CALL SOLICITAR_CLAVE       
+    CALL VERIFICAR_CLAVE       
+
+    JP Z, CLAVE_CORRECTA       ; Si la clave es correcta, salta a CLAVE_CORRECTA
+    CALL MOSTRAR_ERROR         
+
+    ; Incrementa el contador de intentos
+    LD A, (intentos)
+    INC A
+    LD (intentos), A
+
+    ; Verifica si se ha alcanzado el máximo de intentos
+    CP (INTENTOS_MAXIMOS)
+    JP NZ, PEDIR_CLAVE         ; Si no se ha alcanzado, vuelve a pedir la clave
+
+    ; Si se alcanza el máximo de intentos
+    CALL MOSTRAR_BLOQUEO       ; Muestra mensaje de bloqueo
+    JP INICIO                  ; Vuelve al inicio, pero no permite más intentos
+
+CLAVE_CORRECTA:
+    CALL MOSTRAR_ACCESO_CORRECTO
+    JP INICIO                  
+
+; Subrutinas
+SOLICITAR_CLAVE:
+    ; Muestra el mensaje para solicitar la clave
+    LD HL, MENSAJE_SOLICITAR_CLAVE
+    CALL IMPRIMIR_MENSAJE
+
+    ; Lee 4 caracteres de la entrada
+    LD B, 4
+    LD HL, clave_ingresada
+
+LECTURA_DIGITO:
+    CALL LEER_TECLA           ; Lee un carácter de la entrada
+    CP '0'                    ; Verifica si es un dígito
+    JR C, ERROR_ENTRADA
+    CP '9'+1
+    JR NC, ERROR_ENTRADA
+
+    ; Si es un dígito, almacena y muestra '*'
+    LD (HL), A
+    INC HL
+    LD A, '*'
+    CALL IMPRIMIR_CARACTER
+
+    DJNZ LECTURA_DIGITO
+    RET
+
+ERROR_ENTRADA:
+    CALL MOSTRAR_ERROR
+    JP SOLICITAR_CLAVE
+
+VERIFICAR_CLAVE:
+    LD HL, CLAVE_CORRECTA
+    LD DE, clave_ingresada
+    LD BC, 4
+    CALL COMPARE_MEM           ; Compara las claves
+    RET
+
+MOSTRAR_ERROR:
+    LD HL, MENSAJE_ERROR
+    CALL IMPRIMIR_MENSAJE
+    RET
+
+MOSTRAR_BLOQUEO:
+    LD HL, MENSAJE_BLOQUEO
+    CALL IMPRIMIR_MENSAJE
+    RET
+
+MOSTRAR_ACCESO_CORRECTO:
+    LD HL, MENSAJE_ACCESO_CORRECTO
+    CALL IMPRIMIR_MENSAJE
+    RET
+
+; Funciones auxiliares (implementación depende del entorno)
+IMPRIMIR_MENSAJE:
+    ; Implementar según el entorno de trabajo para imprimir una cadena
+    RET
+
+IMPRIMIR_CARACTER:
+    ; Implementar según el entorno de trabajo para imprimir un carácter
+    RET
+
+LEER_TECLA:
+    ; Implementar según el entorno de trabajo para leer una tecla
+    RET
+
+COMPARE_MEM:
+    ; Implementar comparación de memoria byte a byte
+    RET
+
+; Mensajes
+MENSAJE_SOLICITAR_CLAVE: DB 'Ingrese su clave de 4 dígitos: ', 0
+MENSAJE_ERROR: DB 'Error: Solo se permiten números. Intente de nuevo.', 0
+MENSAJE_BLOQUEO: DB 'Acceso bloqueado. No puede intentar nuevamente.', 0
+MENSAJE_ACCESO_CORRECTO: DB 'Clave correcta. Acceso permitido.', 0
+
+END
